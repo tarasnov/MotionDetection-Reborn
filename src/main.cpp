@@ -1,7 +1,7 @@
 #include <opencv2/opencv.hpp>
 #include <iostream>
 
-#include "motion_detection.h"
+#include "include/motion_detection.h"
 
 int main(int argc, char** argv) {
     if (argc < 2) {

@@ -21,10 +21,10 @@ set(SOURCES
 
 # Optionally, list headers so that IDEs recognize them
 set(HEADERS
-    src/motion_detection.h
-    src/feature_extractor.h
-    src/keypoint_matcher.h
-    src/model.h
+        src/include/motion_detection.h
+        src/include/feature_extractor.h
+        src/include/keypoint_matcher.h
+        src/include/model.h
 )
 
 # Add the executable

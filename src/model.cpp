@@ -1,4 +1,4 @@
-#include "model.h"
+#include "include/model.h"
 
 Model::Model(std::string) {
 }
