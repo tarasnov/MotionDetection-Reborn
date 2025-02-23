@@ -16,9 +16,10 @@ public:
     using Keypoints = std::vector<cv::KeyPoint>;
     using TimePoint = std::chrono::steady_clock::time_point;
 
-    MovementDetection(const std::string& model_path, std::chrono::milliseconds window_duration, float threshold = 0.5);
-    
-    cv::Mat PushFrame(const cv::Mat& frame, TimePoint timestamp, bool skip_detection = false);
+    MovementDetection(const std::string &model_path, std::chrono::milliseconds window_duration, float threshold = 0.5);
+
+    cv::Mat PushFrame(const cv::Mat &frame, TimePoint timestamp, bool skip_detection = false);
+
 private:
     std::vector<cv::Point2d> Process() const;
 
@@ -28,12 +29,15 @@ private:
         Keypoints keypoints;
         cv::Mat descriptors;
 
-        BufferEntry(TimePoint timestamp, const cv::Mat& frame, Keypoints keypoints, cv::Mat descriptors);
+        BufferEntry(TimePoint timestamp, cv::Mat frame, Keypoints keypoints, cv::Mat descriptors);
     };
 
     std::vector<cv::Mat> GetAlignedFrames() const;
-    cv::Mat CalcTransform(const Keypoints& keypoints, const cv::Mat& descriptors, const Keypoints& to_keypoints, const cv::Mat& to_descriptors) const;
-    std::vector<cv::Point2d> MotionDetection(cv::Mat&& x_input) const;
+
+    cv::Mat CalcTransform(const Keypoints &keypoints, const cv::Mat &descriptors, const Keypoints &to_keypoints,
+                          const cv::Mat &to_descriptors) const;
+
+    std::vector<cv::Point2d> MotionDetection(cv::Mat &&x_input) const;
 
     static constexpr int kMaxMatchFails = 3; // max number of matcher fails before emptying the buffer
     static constexpr int kNnInputFrames = 5; // number of frames that NN requires to perform movement detection

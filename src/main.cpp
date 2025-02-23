@@ -3,7 +3,7 @@
 
 #include "include/motion_detection.h"
 
-int main(int argc, char** argv) {
+int main(int argc, char **argv) {
     if (argc < 2) {
         std::cerr << "Usage: " << argv[0] << " <path-to-video>" << std::endl;
         return 1;
@@ -21,11 +21,11 @@ int main(int argc, char** argv) {
     }
 
     MovementDetection detector("dummy_path", std::chrono::seconds(1));
-    
+
     for (int i = 0; i < 120; i++) {
         static cv::Mat frame;
-        cap >> frame;  // Capture a new frame
-        if (frame.empty()) break;  // End of video stream
+        cap >> frame; // Capture a new frame
+        if (frame.empty()) break; // End of video stream
 
         // Process the frame (this is where your algorithm goes)
         cv::imshow("Frame", frame);

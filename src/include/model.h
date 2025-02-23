@@ -8,6 +8,7 @@ class Model {
 public:
     explicit Model(std::string model_path);
 
-    std::vector<cv::Point2d> Forward(cv::Mat&& x_input) const;
+    std::vector<cv::Point2d> Forward(cv::Mat &&x_input) const;
+
 private:
 };
