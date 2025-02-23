@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.10)
 project(MovementDetectionCPP)
 
+# Set additional optimization flags for Release builds.
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -march=native -flto")
+
 # Find dependencies
 find_package(OpenCV REQUIRED)
 find_package(HailoRT REQUIRED)
