@@ -1,3 +1,5 @@
+#pragma once
+
 #include <string>
 #include <chrono>
 #include <deque>
@@ -6,6 +8,7 @@
 
 #include "feature_extractor.h"
 #include "keypoint_matcher.h"
+#include "model.h"
 
 
 class MovementDetection {
@@ -17,7 +20,7 @@ public:
     
     cv::Mat PushFrame(const cv::Mat& frame, TimePoint timestamp, bool skip_detection = false);
 private:
-    std::vector<cv::Point2d> Process();
+    std::vector<cv::Point2d> Process() const;
 
     struct BufferEntry {
         TimePoint timestamp;
@@ -30,16 +33,18 @@ private:
 
     std::vector<cv::Mat> GetAlignedFrames() const;
     cv::Mat CalcTransform(const Keypoints& keypoints, const cv::Mat& descriptors, const Keypoints& to_keypoints, const cv::Mat& to_descriptors) const;
-    cv::Mat MotionDetection(cv::Mat&& x_input) const;
+    std::vector<cv::Point2d> MotionDetection(cv::Mat&& x_input) const;
 
     static constexpr int kMaxMatchFails = 3; // max number of matcher fails before emptying the buffer
     static constexpr int kNnInputFrames = 5; // number of frames that NN requires to perform movement detection
     static constexpr int kMinMatches = 15; // min matches between frames
 
-    std::chrono::milliseconds window_duration_;
-    float threshold_;
+    const std::chrono::milliseconds window_duration_;
+    const float threshold_;
 
     std::deque<BufferEntry> buffer_;
-    FeatureExtractor extractor_;
-    KeypointMatcher matcher_;
+
+    const FeatureExtractor extractor_;
+    const KeypointMatcher matcher_;
+    const Model model_;
 };

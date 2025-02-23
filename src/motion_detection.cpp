@@ -10,11 +10,12 @@ MovementDetection::BufferEntry::BufferEntry(TimePoint timestamp, const cv::Mat& 
 
 MovementDetection::MovementDetection(const std::string& model_path, std::chrono::milliseconds window_duration, float threshold)
     : window_duration_(window_duration)
-    , threshold_(threshold) {
+    , threshold_(threshold)
+    , model_(model_path) {
 }
 
 
-std::vector<cv::Point2d> MovementDetection::Process() {
+std::vector<cv::Point2d> MovementDetection::Process() const {
     if (buffer_.size() < kNnInputFrames) {
         return {};
     }
@@ -25,13 +26,14 @@ std::vector<cv::Point2d> MovementDetection::Process() {
         return {};
     }
 
-    const auto x_input = cv::dnn::blobFromImages(aligned_frames);
+    auto x_input = cv::dnn::blobFromImages(aligned_frames);
+    const auto detections = MotionDetection(std::move(x_input));
 
     return {};
 }
 
 std::vector<cv::Mat> MovementDetection::GetAlignedFrames() const {
-    std::vector<cv::Mat> aligned_frames = {buffer_.back().frame};
+    std::vector aligned_frames = {buffer_.back().frame};
 
     int height = buffer_[0].frame.rows;
     int width  = buffer_[0].frame.cols;
@@ -52,7 +54,7 @@ std::vector<cv::Mat> MovementDetection::GetAlignedFrames() const {
     return aligned_frames;
 }
 
-cv::Mat MovementDetection::MotionDetection(cv::Mat&& x_input) const {
+std::vector<cv::Point2d> MovementDetection::MotionDetection(cv::Mat&& x_input) const {
     // x_input is assumed to be a 4D blob with shape [N, C, H, W].
     // Get the original dimensions.
     CV_Assert(x_input.dims == 4);
@@ -71,27 +73,7 @@ cv::Mat MovementDetection::MotionDetection(cv::Mat&& x_input) const {
     cv::Mat x_normalized;
     reshaped.convertTo(x_normalized, CV_32F, 1.0 / 255.0);
 
-    // Pass the blob through the model.
-    // (Depending on your model, you may need to set input names, etc.)
-    std::exit(0);
-
-
-    // model.setInput(x_normalized);
-    // cv::Mat model_output = model.forward();
-
-    // // The expected output shape is [1, 1, H_out, W_out].
-    // // We want to "squeeze" out the first two dimensions to obtain [H_out, W_out].
-    // // Check that the output has 4 dimensions and the first two are 1.
-    // CV_Assert(model_output.dims == 4);
-    // CV_Assert(model_output.size[0] == 1 && model_output.size[1] == 1);
-
-    // int H_out = model_output.size[2];
-    // int W_out = model_output.size[3];
-
-    // // Create a 2D cv::Mat from the model output data.
-    // // Note: We use clone() to ensure that the data is copied.
-    // cv::Mat output(H_out, W_out, model_output.type(), model_output.ptr<float>());
-    // return output.clone();
+    return model_.Forward(std::move(x_normalized));
 }
 
 
@@ -134,7 +116,7 @@ cv::Mat MovementDetection::PushFrame(const cv::Mat& frame, TimePoint timestamp, 
         buffer_.pop_front();
     }
 
-    auto [keypoints, descriptors] = extractor_.forward(frame);
+    auto [keypoints, descriptors] = extractor_.Forward(frame);
     buffer_.emplace_back(timestamp, frame, std::move(keypoints), std::move(descriptors));
 
     std::vector<cv::Point2d> detections;

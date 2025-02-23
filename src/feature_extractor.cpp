@@ -12,7 +12,7 @@ FeatureExtractor::FeatureExtractor() {
         20);       // fastThreshold (default)
 }
 
-std::pair<std::vector<cv::KeyPoint>, cv::Mat> FeatureExtractor::forward(const cv::Mat& frame) {
+std::pair<std::vector<cv::KeyPoint>, cv::Mat> FeatureExtractor::Forward(const cv::Mat& frame) const {
     // Check that the image depth is CV_8U (8-bit unsigned)
     if (frame.depth() != CV_8U) {
         throw std::invalid_argument("Frame depth is not CV_8U");

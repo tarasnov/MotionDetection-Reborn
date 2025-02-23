@@ -1,3 +1,5 @@
+#pragma once
+
 #include <opencv2/opencv.hpp>
 
 
@@ -5,7 +7,7 @@ class FeatureExtractor {
     public:
         FeatureExtractor();
     
-        std::pair<std::vector<cv::KeyPoint>, cv::Mat> forward(const cv::Mat& frame);
+        std::pair<std::vector<cv::KeyPoint>, cv::Mat> Forward(const cv::Mat& frame) const;
     
     private:
         static constexpr int kMaxCorners = 1000;

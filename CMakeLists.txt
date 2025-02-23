@@ -16,6 +16,7 @@ set(SOURCES
     src/motion_detection.cpp
     src/feature_extractor.cpp
     src/keypoint_matcher.cpp
+    src/model.cpp
 )
 
 # Optionally, list headers so that IDEs recognize them
@@ -23,6 +24,7 @@ set(HEADERS
     src/motion_detection.h
     src/feature_extractor.h
     src/keypoint_matcher.h
+    src/model.h
 )
 
 # Add the executable
