@@ -30,7 +30,8 @@ std::vector<cv::Point2d> MovementDetection::Process() const {
         return {};
     }
 
-    auto x_input = cv::dnn::blobFromImages(aligned_frames);
+    static cv::Mat x_input; 
+    cv::dnn::blobFromImages(aligned_frames, x_input, 1.0, cv::Size(), cv::Scalar(), false, false, CV_8U);
     const auto detections = MotionDetection(std::move(x_input));
 
     return {};
@@ -75,7 +76,7 @@ std::vector<cv::Point2d> MovementDetection::MotionDetection(cv::Mat &&x_input) c
     cv::Mat reshaped = x_input.reshape(0, 4, new_sizes);
 
     // Normalize: convert to float and scale by 1/255.
-    cv::Mat x_normalized;
+    static cv::Mat x_normalized;
     reshaped.convertTo(x_normalized, CV_32F, 1.0 / 255.0);
 
     return model_.Forward(std::move(x_normalized));
@@ -88,32 +89,30 @@ cv::Mat MovementDetection::CalcTransform(const Keypoints &keypoints, const cv::M
     // The matchTo function should behave similar to your Python version.
     auto matches = matcher_.MatchTo(keypoints, descriptors, to_keypoints, to_descriptors);
 
-    // Check if we have enough matches.
-    if (matches.size() >= static_cast<size_t>(kMinMatches)) {
-        std::vector<cv::Point2f> points1;
-        std::vector<cv::Point2f> points2;
-
-        points1.reserve(matches.size());
-        points2.reserve(matches.size());
-
-        // Unzip the matches into two vectors of point coordinates.
-        for (const auto &match: matches) {
-            points1.push_back(match.first.pt);
-            points2.push_back(match.second.pt);
-        }
-
-        // Estimate an affine partial 2D transformation using RANSAC.
-        cv::Mat inliers;
-        cv::Mat M = cv::estimateAffinePartial2D(points1, points2, inliers, cv::RANSAC);
-
-        // Check if a valid transformation was found and that the number of inliers is sufficient.
-        if (!M.empty() && cv::countNonZero(inliers) >= static_cast<int>(kMinMatches * 0.5)) {
-            return M;
-        }
+    if (matches.size() < static_cast<size_t>(kMinMatches)) {
+        return {};
     }
 
-    // Return an empty matrix if the transformation is not valid.
-    return {};
+    std::vector<cv::Point2f> points1;
+    std::vector<cv::Point2f> points2;
+
+    points1.reserve(matches.size());
+    points2.reserve(matches.size());
+
+    // Unzip the matches into two vectors of point coordinates.
+    for (const auto &match: matches) {
+        points1.push_back(match.first.pt);
+        points2.push_back(match.second.pt);
+    }
+
+    // Estimate an affine partial 2D transformation using RANSAC.
+    cv::Mat inliers;
+    cv::Mat M = cv::estimateAffinePartial2D(points1, points2, inliers, cv::RANSAC);
+
+    // Check if a valid transformation was found and that the number of inliers is sufficient.
+    if (!M.empty() && cv::countNonZero(inliers) >= static_cast<int>(kMinMatches * 0.5)) {
+        return M;
+    }
 }
 
 
