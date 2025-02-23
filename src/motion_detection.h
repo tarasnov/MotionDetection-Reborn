@@ -37,6 +37,7 @@ private:
     static constexpr int kMinMatches = 15; // min matches between frames
 
     std::chrono::milliseconds window_duration_;
+    float threshold_;
 
     std::deque<BufferEntry> buffer_;
     FeatureExtractor extractor_;

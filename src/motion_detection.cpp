@@ -9,7 +9,8 @@ MovementDetection::BufferEntry::BufferEntry(TimePoint timestamp, const cv::Mat& 
 }
 
 MovementDetection::MovementDetection(const std::string& model_path, std::chrono::milliseconds window_duration, float threshold)
-    : window_duration_(window_duration) {
+    : window_duration_(window_duration)
+    , threshold_(threshold) {
 }
 
 
@@ -20,6 +21,12 @@ std::vector<cv::Point2d> MovementDetection::Process() {
 
     const auto aligned_frames = GetAlignedFrames();
 
+    if (aligned_frames.empty()) {
+        return {};
+    }
+
+    const auto x_input = cv::dnn::blobFromImages(aligned_frames);
+
     return {};
 }
 
@@ -28,7 +35,6 @@ std::vector<cv::Mat> MovementDetection::GetAlignedFrames() const {
 
     int height = buffer_[0].frame.rows;
     int width  = buffer_[0].frame.cols;
-    int channels = buffer_[0].frame.channels();
 
     int step = buffer_.size() / kNnInputFrames;
     for (int i = buffer_.size() - step - 1; aligned_frames.size() < kNnInputFrames; i -= step) {
@@ -39,7 +45,7 @@ std::vector<cv::Mat> MovementDetection::GetAlignedFrames() const {
         }
 
         const auto& frame = buffer_[i].frame;
-        auto warped_frame = aligned_frames.emplace_back();
+        auto& warped_frame = aligned_frames.emplace_back();
         cv::warpAffine(frame, warped_frame, M, cv::Size(width, height));
     }
 
