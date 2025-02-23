@@ -1,37 +1,43 @@
 cmake_minimum_required(VERSION 3.10)
 project(MovementDetectionCPP)
 
-# Find OpenCV package
+# Find dependencies
 find_package(OpenCV REQUIRED)
+find_package(HailoRT REQUIRED)
 
-# Optionally, if you decide to use pybind11 for NumPy support, you can add it here:
-# add_subdirectory(pybind11)  # Assuming you clone pybind11 into your project
+# Fetch GoogleTest (which includes GoogleMock)
+include(FetchContent)
+FetchContent_Declare(
+        googletest
+        URL https://github.com/google/googletest/archive/release-1.12.1.tar.gz
+)
+FetchContent_MakeAvailable(googletest)
 
-# Include OpenCV headers
+# Include directories for our project
 include_directories(${OpenCV_INCLUDE_DIRS})
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/include)
 
-# List your source files
-set(SOURCES
-    src/main.cpp
-    src/motion_detection.cpp
-    src/feature_extractor.cpp
-    src/keypoint_matcher.cpp
-    src/model.cpp
+# Create a library from your source files (excluding main.cpp and test files)
+add_library(movementDetectionLib
+        src/motion_detection.cpp
+        src/feature_extractor.cpp
+        src/keypoint_matcher.cpp
+        src/model.cpp
 )
+target_link_libraries(movementDetectionLib PRIVATE ${OpenCV_LIBS} HailoRT::libhailort)
 
-# Optionally, list headers so that IDEs recognize them
-set(HEADERS
-        src/include/motion_detection.h
-        src/include/feature_extractor.h
-        src/include/keypoint_matcher.h
-        src/include/model.h
-)
+# Build the main executable from main.cpp
+add_executable(${PROJECT_NAME} src/main.cpp)
+target_link_libraries(${PROJECT_NAME} PRIVATE movementDetectionLib)
 
-# Add the executable
-add_executable(MovementDetectionCPP ${SOURCES} ${HEADERS})
+# Build the test executable from tests/test_hailo.cpp
+add_executable(MyTests tests/test_hailo.cpp)
+target_link_libraries(MyTests PRIVATE movementDetectionLib gtest gtest_main)
 
-# Link against OpenCV libraries
-target_link_libraries(MovementDetectionCPP ${OpenCV_LIBS})
+# Discover and add tests to CTest
+include(GoogleTest)
+gtest_discover_tests(MyTests)
 
-# If using pybind11, link it as well:
-# target_link_libraries(MovementDetectionCPP PRIVATE pybind11::embed)
+# Optional: if you decide to use pybind11, add and link it here:
+# add_subdirectory(pybind11)
+# target_link_libraries(${PROJECT_NAME} PRIVATE pybind11::embed)
