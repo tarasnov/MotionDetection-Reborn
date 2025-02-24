@@ -1,6 +1,6 @@
 #include "include/model.h"
 
-Model::Model(std::string) {
+Model::Model(std::string path) {
 }
 
 std::vector<cv::Point2d> Model::Forward(cv::Mat &&x_input) const {

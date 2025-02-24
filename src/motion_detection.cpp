@@ -113,6 +113,8 @@ cv::Mat MovementDetection::CalcTransform(const Keypoints &keypoints, const cv::M
     if (!M.empty() && cv::countNonZero(inliers) >= static_cast<int>(kMinMatches * 0.5)) {
         return M;
     }
+
+    return {};
 }
 
 

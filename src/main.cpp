@@ -27,10 +27,6 @@ int main(int argc, char **argv) {
         cap >> frame; // Capture a new frame
         if (frame.empty()) break; // End of video stream
 
-        // Process the frame (this is where your algorithm goes)
-        // cv::imshow("Frame", frame);
-        // if (cv::waitKey(30) >= 0) break;
-
         const auto start_time = std::chrono::steady_clock::now();
         detector.PushFrame(frame, std::chrono::steady_clock::now(), false);
         const auto elapsed_time = std::chrono::steady_clock::now() - start_time;
